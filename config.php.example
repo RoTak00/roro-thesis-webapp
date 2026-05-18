@@ -1,0 +1,22 @@
+<?php
+
+$SITE_NAME = "Romanian Dialectal Analysis";
+
+$SERVERNAME = "db";
+$USERNAME = "app";
+$PASSWORD = "app";
+$DATABASE = "app";
+
+$HOST = getenv("HOST");
+$IS_LOCAL = true;
+
+$PHP_DISPLAY_ERRORS = 1;
+$PHP_DISPLAY_STARTUP_ERRORS = 1;
+$PHP_ERROR_REPORTING = 1;
+
+$DEFAULT_TIMEZONE = "UTC";
+
+$WEBSITE_NAME = 'Romanian Dialectal Analysis';
+
+$DEBUG_MODE = 0;
+?>
