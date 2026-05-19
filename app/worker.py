@@ -1,17 +1,30 @@
+# worker.py
 import time
+from db import get_connection, fetch_pending_task
+from task_processor import process_task, fail_task
+from config import POLL_SECONDS
+from logger import log
 
-def main():
+log("worker started")
 
-    print("Hello world")
+while True:
+    conn = get_connection()
 
-    while True:
+    try:
+        task = fetch_pending_task(conn)
 
-        print("Ping")
+        if not task:
+            log("sleeping")
+            time.sleep(POLL_SECONDS)
+            continue
 
-        time.sleep(2)
-        pass
+        try:
+            log(f"running task {task['task_id']}")
+            process_task(conn, task)
+            log(f"done task {task['task_id']}")
+        except Exception:
+            fail_task(conn, task)
+            log(f"failed task {task['task_id']}")
 
-if __name__ == "__main__":
-    main()
-
-
+    finally:
+        conn.close()

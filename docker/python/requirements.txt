@@ -1,7 +1,9 @@
-numpy
+numpy==1.26.4
 pandas
-scikit-learn
+scikit-learn==1.5.2
 matplotlib
-shap
+shap==0.46.0
 joblib
-mysql-connector-python
+pymysql
+beautifulsoup4
+cryptography

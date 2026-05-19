@@ -8,7 +8,7 @@ services:
       - "8080:80"
     volumes:
       - ./:/var/www/html
-      - ./storage/tasks:/var/www/html/storage/tasks
+      - ./:/app
     depends_on:
       - db
       - python-worker
@@ -19,7 +19,7 @@ services:
       DB_DATABASE: app
       DB_USERNAME: app
       DB_PASSWORD: app
-      TASKS_DIR: /var/www/html/storage/tasks
+      TASKS_DIR: /app/storage/tasks
       PYTHON_WORKER_HOST: python-worker
 
   python-worker:
@@ -46,7 +46,7 @@ services:
       DATASET_DIR: /app/dataset
     depends_on:
       - db
-    command: ["python", "worker.py"]
+    command: ["python", "app/worker.py"]
 
   db:
     image: mysql:8.0

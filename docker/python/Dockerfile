@@ -13,4 +13,4 @@ COPY docker/python/requirements.txt /tmp/requirements.txt
 
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
-CMD ["python", "worker.py"]
+CMD ["python", "app/worker.py"]

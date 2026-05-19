@@ -52,10 +52,17 @@ $(function () {
       data: new FormData(this),
       processData: false,
       contentType: false,
-      dataType: "html",
+      dataType: "json",
     })
-      .done(function (html) {
-        addResult(html);
+      .done(function (response) {
+        addResult(
+          response.html ||
+            "<pre>" + escapeHtml(JSON.stringify(response, null, 2)) + "</pre>",
+        );
+
+        if (response.success && response.task_id) {
+          pollTask(response.task_id);
+        }
       })
       .fail(function (xhr, status, err) {
         addResult("<pre>" + escapeHtml(String(err || status)) + "</pre>");
@@ -120,5 +127,45 @@ $(function () {
       .replaceAll(">", "&gt;")
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#39;");
+  }
+
+  function pollTask(taskId) {
+    const interval = setInterval(function () {
+      $.ajax({
+        url: "/ajax/task_status",
+        method: "GET",
+        data: {
+          task_id: taskId,
+        },
+        dataType: "json",
+      })
+        .done(function (response) {
+          if (!response.success) {
+            clearInterval(interval);
+            addResult(
+              "<pre>" +
+                escapeHtml(response.error || "Task check failed") +
+                "</pre>",
+            );
+            return;
+          }
+
+          if (response.status === "done") {
+            clearInterval(interval);
+            addResult(response.html || "<pre>Task done</pre>");
+          }
+
+          if (response.status === "failed") {
+            clearInterval(interval);
+            addResult(
+              "<pre>" + escapeHtml(response.error || "Task failed") + "</pre>",
+            );
+          }
+        })
+        .fail(function (xhr, status, err) {
+          clearInterval(interval);
+          addResult("<pre>" + escapeHtml(String(err || status)) + "</pre>");
+        });
+    }, 2000);
   }
 });
