@@ -1,16 +1,29 @@
 <?= $head ?>
 
-<div class="app-layout">
-    <?= $navbar ?>
+<div class="layout">
+    <div>
+        <h1>Detectie Ro / Md</h1>
 
-    <main class="app-content">
-        <h1>Hello!</h1>
-        <?php if (!empty($notification)) { ?>
-            <div>
-                <?= $notification ?>
+        <form id="form">
+            <textarea name="text" id="text" placeholder="Introdu textul aici..."></textarea>
+
+            <div class="controls">
+                <button type="submit" id="submitBtn">Incarca</button>
+                <button type="button" id="button-random-entry" class="secondary">Text din baza de date</button>
             </div>
-        <?php } ?>
+        </form>
+    </div>
 
-    </main>
+    <div>
+        <div class="results-head">
+            <button type="button" id="clearAllBtn" class="secondary">Clear all</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+</div>
+
+<div class="loader" id="loader">
+    <div class="spinner"></div>
 </div>
 <?= $footer ?>

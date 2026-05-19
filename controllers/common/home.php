@@ -7,6 +7,8 @@ class CommonHomeController extends BaseController
     {
         $data = [];
 
+        $this->response->addStyle("/resources/css/style.css");
+        $this->response->addScript("/resources/scripts/home.js");
 
         $data['navbar'] = $this->loadController('common/navbar');
         $data['notification'] = $this->loadController('common/notification');
