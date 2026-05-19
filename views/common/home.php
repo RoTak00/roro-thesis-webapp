@@ -7,6 +7,15 @@
         <form id="form">
             <textarea name="text" id="text" placeholder="Introdu textul aici..."></textarea>
 
+            <div class="field">
+                <label for="highlightLevel">
+                    Highlighted features level:
+                    <span id="highlightLevelValue">50</span>
+                </label>
+
+                <input type="range" name="detail_level" id="highlightLevel" min="1" max="100" value="50">
+            </div>
+
             <div class="controls">
                 <button type="submit" id="submitBtn">Incarca</button>
                 <button type="button" id="button-random-entry" class="secondary">Text din baza de date</button>

@@ -16,6 +16,8 @@ class AjaxCreateEntryController extends BaseController
             return;
         }
 
+        $detail_level = $_POST['detail_level'] ?? 50;
+
         $task = $_POST['task'] ?? 'romd';
         $type = $_POST['type'] ?? 'cleaned';
 
@@ -37,7 +39,8 @@ class AjaxCreateEntryController extends BaseController
 
         $shapParams = [
             'task' => $task,
-            'type' => $type
+            'type' => $type,
+            'detail_level' => $detail_level
         ];
 
         $tasksDir = getenv('TASKS_DIR') ?: __DIR__ . '/../../storage/tasks';

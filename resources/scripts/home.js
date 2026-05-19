@@ -5,6 +5,8 @@ $(function () {
   const $randomBtn = $("#button-random-entry");
   const $results = $("#results");
   const $clearAllBtn = $("#clearAllBtn");
+  const $highlightLevel = $("#highlightLevel");
+  const $highlightLevelValue = $("#highlightLevelValue");
 
   function setLoading(state) {
     $loader.css("display", state ? "flex" : "none");
@@ -40,61 +42,30 @@ $(function () {
     $results.prepend($entry);
 
     appendHtmlAndRunScripts($content, html);
+
+    return {
+      entry: $entry,
+      content: $content,
+    };
   }
 
   $form.on("submit", function (e) {
     e.preventDefault();
-    setLoading(true);
 
-    $.ajax({
-      url: "/ajax/create_entry",
-      method: "POST",
-      data: new FormData(this),
-      processData: false,
-      contentType: false,
-      dataType: "json",
-    })
-      .done(function (response) {
-        addResult(
-          response.html ||
-            "<pre>" + escapeHtml(JSON.stringify(response, null, 2)) + "</pre>",
-        );
-
-        if (response.success && response.task_id) {
-          pollTask(response.task_id);
-        }
-      })
-      .fail(function (xhr, status, err) {
-        addResult("<pre>" + escapeHtml(String(err || status)) + "</pre>");
-      })
-      .always(function () {
-        setLoading(false);
-      });
+    createEntry(new FormData(this));
   });
 
   $randomBtn.on("click", function () {
-    setLoading(true);
-
     const data = new FormData();
-    data.append("text", "");
 
-    $.ajax({
-      url: "ajax/create_entry",
-      method: "POST",
-      data: data,
-      processData: false,
-      contentType: false,
-      dataType: "html",
-    })
-      .done(function (html) {
-        addResult(html);
-      })
-      .fail(function (xhr, status, err) {
-        addResult("<pre>" + escapeHtml(String(err || status)) + "</pre>");
-      })
-      .always(function () {
-        setLoading(false);
-      });
+    data.append("text", "");
+    data.append("detail_level", $("#highlightLevel").val());
+
+    createEntry(data);
+  });
+
+  $highlightLevel.on("input", function () {
+    $highlightLevelValue.text($(this).val());
   });
 
   $clearAllBtn.on("click", function () {
@@ -120,6 +91,42 @@ $(function () {
     });
   }
 
+  function createEntry(formData) {
+    setLoading(true);
+
+    $.ajax({
+      url: "/ajax/create_entry",
+      method: "POST",
+      data: formData,
+      processData: false,
+      contentType: false,
+      dataType: "json",
+    })
+      .done(function (response) {
+        const loadingResult = addResult(`
+        <div class="task-loading">
+          <div class="spinner"></div>
+        </div>
+      `);
+
+        if (response.success && response.task_id) {
+          pollTask(response.task_id, loadingResult.content);
+        } else {
+          loadingResult.content.html(
+            "<pre>" +
+              escapeHtml(response.error || "Task creation failed") +
+              "</pre>",
+          );
+        }
+      })
+      .fail(function (xhr, status, err) {
+        addResult("<pre>" + escapeHtml(String(err || status)) + "</pre>");
+      })
+      .always(function () {
+        setLoading(false);
+      });
+  }
+
   function escapeHtml(s) {
     return s
       .replaceAll("&", "&amp;")
@@ -129,7 +136,7 @@ $(function () {
       .replaceAll("'", "&#39;");
   }
 
-  function pollTask(taskId) {
+  function pollTask(taskId, $container) {
     const interval = setInterval(function () {
       $.ajax({
         url: "/ajax/task_status",
@@ -142,29 +149,39 @@ $(function () {
         .done(function (response) {
           if (!response.success) {
             clearInterval(interval);
-            addResult(
+
+            $container.html(
               "<pre>" +
                 escapeHtml(response.error || "Task check failed") +
                 "</pre>",
             );
+
             return;
           }
 
           if (response.status === "done") {
             clearInterval(interval);
-            addResult(response.html || "<pre>Task done</pre>");
+
+            appendHtmlAndRunScripts(
+              $container,
+              response.html || "<pre>Task done</pre>",
+            );
           }
 
           if (response.status === "failed") {
             clearInterval(interval);
-            addResult(
+
+            $container.html(
               "<pre>" + escapeHtml(response.error || "Task failed") + "</pre>",
             );
           }
         })
         .fail(function (xhr, status, err) {
           clearInterval(interval);
-          addResult("<pre>" + escapeHtml(String(err || status)) + "</pre>");
+
+          $container.html(
+            "<pre>" + escapeHtml(String(err || status)) + "</pre>",
+          );
         });
     }, 2000);
   }

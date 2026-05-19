@@ -11,18 +11,18 @@ class RoRoShapWorkerExporter:
         pickle_path,
         tokenizer=r"\W+",
         output_names=None,
-        topk_mode="auto",
-        min_k=15,
-        topk_ratio=15,
+        detail_level = 50,
+        min_k=8,
+        max_k=None,
     ):
         self.pickle_path = Path(pickle_path)
 
         self.tokenizer = tokenizer
         self.output_names = output_names
 
-        self.topk_mode = topk_mode
+        self.detail_level = max(1, min(100, int(detail_level)))
         self.min_k = min_k
-        self.topk_ratio = topk_ratio
+        self.max_k = max_k
 
         self.payload = None
         self.model = None
@@ -81,15 +81,22 @@ class RoRoShapWorkerExporter:
         )
 
     def _get_k(self, text):
-        if isinstance(self.topk_mode, int):
-            return self.topk_mode
-
         wc = len(text.split())
 
-        if self.topk_mode == "all":
+        if self.detail_level >= 100:
             return wc
 
-        return max(self.min_k, wc // self.topk_ratio + 1)
+        # maps 1..100 to roughly 5%..100%
+        ratio = 0.05 + (self.detail_level / 100) * 0.95
+
+        k = int(wc * ratio)
+
+        k = max(self.min_k, k)
+
+        if self.max_k is not None:
+            k = min(self.max_k, k)
+
+        return min(k, wc)
 
     @staticmethod
     def keep_topk_tokens(sv, k=20):

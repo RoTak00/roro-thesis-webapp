@@ -17,11 +17,13 @@ def process_task(conn, task):
     text = input_file.read_text(encoding="utf-8")
 
     shap_params = json.loads(task["shap_params"] or "{}")
+
+    log(f"shap params: {shap_params}")
     
     log(f"loading model {task['model_name']}")
     exporter = RoRoShapWorkerExporter(
         pickle_path=task["model_name"],
-        topk_mode=shap_params.get("k_features", "auto"),
+        detail_level=shap_params.get("detail_level", 50),
     )
 
     html = exporter.export_one(text)
