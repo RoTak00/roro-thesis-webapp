@@ -223,8 +223,38 @@ class RoRoShapWorkerExporter:
         ).strip()
     
     @staticmethod
-    def inject_text_between_token_divs(html: str, full_text: str) -> str:
+    def _norm_with_map(s: str):
+        norm = []
+        pos_map = []
 
+        for i, ch in enumerate(s):
+            if re.match(r"[\wăâîșțĂÂÎȘȚ]", ch, flags=re.UNICODE):
+                norm.append(ch.lower())
+                pos_map.append(i)
+
+        return "".join(norm), pos_map
+
+
+    @staticmethod
+    def _raw_parts_for_alignment(full_text: str):
+        parts = []
+
+        for part in re.findall(r"\S+\s*", full_text, flags=re.UNICODE):
+            # split hyphenated words only
+            m = re.match(r"^([\wăâîșțĂÂÎȘȚ]+)-([\wăâîșțĂÂÎȘȚ]+)([^\wăâîșțĂÂÎȘȚ\s]*\s*)$", part, flags=re.UNICODE)
+
+            if m:
+                first, second, tail = m.groups()
+                parts.append(first + "-")
+                parts.append(second + tail)
+            else:
+                parts.append(part)
+
+        return parts
+
+
+    @staticmethod
+    def inject_text_between_token_divs(html: str, full_text: str) -> str:
         soup = BeautifulSoup(html, "html.parser")
 
         token_id_rx = re.compile(r"^_tp_.*_ind_\d+$")
@@ -237,9 +267,18 @@ class RoRoShapWorkerExporter:
             and isinstance(lab.parent, Tag)
         ]
 
-        raw_parts = re.findall(r"\S+\s*", full_text, flags=re.UNICODE)
+        for cont in containers:
+            raw_parts = []
 
-        for ci, cont in enumerate(containers):
+            for part in RoRoShapWorkerExporter._raw_parts_for_alignment(full_text):
+                norm, pos_map = RoRoShapWorkerExporter._norm_with_map(part)
+
+                raw_parts.append({
+                    "text": part,
+                    "norm": norm,
+                    "map": pos_map,
+                })
+
             token_divs = [
                 d for d in cont.find_all("div")
                 if isinstance(d, Tag)
@@ -249,52 +288,41 @@ class RoRoShapWorkerExporter:
 
             raw_i = 0
 
-            log(f"[container {ci}] token divs: {len(token_divs)}")
-
             for d in token_divs:
                 token_text = d.get_text(strip=False)
-
-                token_norm = RoRoShapWorkerExporter._norm_align_token(token_text)
+                token_norm, _ = RoRoShapWorkerExporter._norm_with_map(token_text)
 
                 if not token_norm:
                     continue
 
                 inserted_gap = []
-
                 matched = False
 
                 while raw_i < len(raw_parts):
-                    raw_part = raw_parts[raw_i]
+                    raw = raw_parts[raw_i]
 
-                    raw_norm = RoRoShapWorkerExporter._norm_align_token(raw_part)
-
-                    if raw_norm == token_norm or raw_norm.startswith(token_norm) or token_norm.startswith(raw_norm):
-                        matched = True
-
+                    if raw["norm"] == token_norm:
                         if inserted_gap:
-                            d.insert_before(
-                                NavigableString("".join(inserted_gap))
-                            )
+                            d.insert_before(NavigableString("".join(inserted_gap)))
 
                         d.clear()
-                        d.append(NavigableString(raw_part))
+                        d.append(NavigableString(raw["text"]))
 
                         raw_i += 1
-
+                        matched = True
                         break
 
-                    inserted_gap.append(raw_part)
+                    inserted_gap.append(raw["text"])
                     raw_i += 1
 
                 if not matched:
                     log(f"[warn] could not align token: {token_text!r}")
 
             if raw_i < len(raw_parts) and token_divs:
-                tail = "".join(raw_parts[raw_i:])
+                tail = "".join(raw["text"] for raw in raw_parts[raw_i:])
                 token_divs[-1].insert_after(NavigableString(tail))
 
         return str(soup)
-
 
     @staticmethod
     def inject_text_by_percent_tags(html: str, full_text: str, *, log=True) -> str:
