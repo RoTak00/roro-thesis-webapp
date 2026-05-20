@@ -25,6 +25,7 @@ def process_task(conn, task):
         pickle_path=task["model_name"],
         detail_level=shap_params.get("detail_level", 50),
         text_variant = shap_params.get("type", "cleaned"),
+        shap_injection= shap_params.get("shap_injection_type", None),
     )
 
     html = exporter.export_one(text)

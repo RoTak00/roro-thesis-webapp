@@ -62,6 +62,7 @@ $(function () {
     data.append("detail_level", $("#highlightLevel").val());
     data.append("task", $("#task").val());
     data.append("type", $("#type").val());
+    data.append("reinject_text", $("#reinjectText").is(":checked") ? "1" : "0");
 
     if (!$("#type").val()) {
       return;
@@ -77,6 +78,25 @@ $(function () {
   $clearAllBtn.on("click", function () {
     $results.empty();
   });
+
+  const $type = $("#type");
+  const $reinjectText = $("#reinjectText");
+
+  function updateReinjectAvailability() {
+    const value = $type.val();
+
+    const allowed = !["cleaned", "stop-list"].includes(value);
+
+    $reinjectText.prop("disabled", !allowed);
+
+    if (!allowed) {
+      $reinjectText.prop("checked", false);
+    }
+  }
+
+  $type.on("change", updateReinjectAvailability);
+
+  updateReinjectAvailability();
 
   function appendHtmlAndRunScripts($container, html) {
     const $tmp = $("<div>").html(html);

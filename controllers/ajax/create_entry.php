@@ -20,7 +20,16 @@ class AjaxCreateEntryController extends BaseController
 
         $task = $_POST['task'] ?? 'romd';
         $type = $_POST['type'] ?? 'cleaned';
-        $shap_injection = $_POST['shap_injection'] ?? false;
+
+        // Injection type
+        $shap_injection = !empty($_POST['reinject_text']);
+        $shap_injection_type = null;
+
+        if ($shap_injection) {
+            $shap_injection_type = str_contains($type, '-ph')
+                ? 'placeholder'
+                : 'spaces';
+        }
 
         $allowedTasks = ['romd', 'regions'];
         $allowedTypes = ['cleaned', 'ner-ph', 'ner', 'stop-ph', 'stop-list', 'stop'];
@@ -59,7 +68,7 @@ class AjaxCreateEntryController extends BaseController
             'task' => $task,
             'type' => $type,
             'detail_level' => $detail_level,
-            'shap_injection' => $shap_injection
+            'shap_injection_type' => $shap_injection_type
         ];
 
         $tasksDir = getenv('TASKS_DIR') ?: __DIR__ . '/../../storage/tasks';

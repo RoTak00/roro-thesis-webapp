@@ -5,6 +5,11 @@ import spacy
 
 import numpy as np
 import shap
+from bs4 import BeautifulSoup
+from bs4.element import NavigableString, Tag
+import unicodedata
+
+from logger import log
 
 
 class RoRoShapWorkerExporter:
@@ -16,6 +21,7 @@ class RoRoShapWorkerExporter:
         detail_level = 50,
         min_k=8,
         max_k=None,
+        shap_injection=None,
         text_variant="cleaned",
         spacy_model_name="ro_core_news_lg",
     ):
@@ -23,6 +29,7 @@ class RoRoShapWorkerExporter:
 
         self.tokenizer = tokenizer
         self.output_names = output_names
+        self.shap_injection = shap_injection
 
         self.text_variant = text_variant
         self.spacy_model_name = spacy_model_name
@@ -70,7 +77,7 @@ class RoRoShapWorkerExporter:
         return self.model.predict_proba(X)
 
     def export_one(self, text):
-
+        raw_text = text 
         text = self.preprocess_text(text)
 
         shap_values = self.explainer([text])
@@ -82,6 +89,12 @@ class RoRoShapWorkerExporter:
         sv = self.keep_topk_tokens(sv, k)
 
         html = shap.plots.text(sv, display=False)
+
+        if self.shap_injection == "spaces":
+            html = self.inject_text_between_token_divs(html, raw_text)
+
+        elif self.shap_injection == "placeholder":
+            html = self.inject_text_by_percent_tags(html, raw_text, log=None)
 
         pred = self.model.predict(
             self.vectorizer.transform([text])
@@ -208,3 +221,138 @@ class RoRoShapWorkerExporter:
             else (f"%{t.pos_}% " if use_placeholder else "")
             for t in doc
         ).strip()
+    
+    @staticmethod
+    def inject_text_between_token_divs(html: str, full_text: str) -> str:
+
+        soup = BeautifulSoup(html, "html.parser")
+
+        token_id_rx = re.compile(r"^_tp_.*_ind_\d+$")
+
+        containers = [
+            lab.parent
+            for lab in soup.find_all("div")
+            if isinstance(lab, Tag)
+            and lab.get_text(strip=True) == "inputs"
+            and isinstance(lab.parent, Tag)
+        ]
+
+        raw_parts = re.findall(r"\S+\s*", full_text, flags=re.UNICODE)
+
+        for ci, cont in enumerate(containers):
+            token_divs = [
+                d for d in cont.find_all("div")
+                if isinstance(d, Tag)
+                and d.get("id")
+                and token_id_rx.match(d["id"])
+            ]
+
+            raw_i = 0
+
+            log(f"[container {ci}] token divs: {len(token_divs)}")
+
+            for d in token_divs:
+                token_text = d.get_text(strip=False)
+
+                token_norm = RoRoShapWorkerExporter._norm_align_token(token_text)
+
+                if not token_norm:
+                    continue
+
+                inserted_gap = []
+
+                matched = False
+
+                while raw_i < len(raw_parts):
+                    raw_part = raw_parts[raw_i]
+
+                    raw_norm = RoRoShapWorkerExporter._norm_align_token(raw_part)
+
+                    if raw_norm == token_norm or raw_norm.startswith(token_norm) or token_norm.startswith(raw_norm):
+                        matched = True
+
+                        if inserted_gap:
+                            d.insert_before(
+                                NavigableString("".join(inserted_gap))
+                            )
+
+                        d.clear()
+                        d.append(NavigableString(raw_part))
+
+                        raw_i += 1
+
+                        break
+
+                    inserted_gap.append(raw_part)
+                    raw_i += 1
+
+                if not matched:
+                    log(f"[warn] could not align token: {token_text!r}")
+
+            if raw_i < len(raw_parts) and token_divs:
+                tail = "".join(raw_parts[raw_i:])
+                token_divs[-1].insert_after(NavigableString(tail))
+
+        return str(soup)
+
+
+    @staticmethod
+    def inject_text_by_percent_tags(html: str, full_text: str, *, log=True) -> str:
+        soup = BeautifulSoup(html, "html.parser")
+
+        token_id_rx = re.compile(r"^_tp_.*_ind_\d+$")
+        tag_tail_rx = re.compile(r"^[A-Z]+%")
+
+        containers = [
+            lab.parent
+            for lab in soup.find_all("div")
+            if isinstance(lab, Tag)
+            and lab.get_text(strip=True) == "inputs"
+            and isinstance(lab.parent, Tag)
+        ]
+
+        for cont in containers:
+            raw_words = re.findall(r"\S+", full_text)
+            raw_i = 0
+
+            token_divs = [
+                d for d in cont.find_all("div")
+                if isinstance(d, Tag)
+                and d.get("id")
+                and token_id_rx.match(d["id"])
+            ]
+
+            for d in token_divs:
+                text = d.get_text(strip=False)
+
+                def repl_tag(match):
+                    nonlocal raw_i
+
+                    if raw_i >= len(raw_words):
+                        return ""
+
+                    word = raw_words[raw_i]
+                    raw_i += 1
+
+                    return word
+
+                new_text = tag_tail_rx.sub(repl_tag, text, count=1)
+                new_text = new_text.replace("%", "")
+
+                visible_words = re.findall(r"\S+", new_text)
+
+                for w in visible_words:
+                    if raw_i < len(raw_words) and w.strip() == raw_words[raw_i]:
+                        raw_i += 1
+
+                d.clear()
+                d.append(NavigableString(new_text))
+
+        return str(soup)
+
+    
+    @staticmethod
+    def _norm_align_token(s: str) -> str:
+        s = s.lower().strip()
+        s = re.sub(r"[^\wăâîșțĂÂÎȘȚ]", "", s, flags=re.UNICODE)
+        return s

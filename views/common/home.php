@@ -28,6 +28,15 @@
                 </select>
             </div>
 
+            <div class="field">
+                <label>&nbsp;</label>
+                <label>
+                    <input type="checkbox" name="reinject_text" id="reinjectText" value="1" disabled>
+
+                    Reinject text into result
+                </label>
+            </div>
+
             <textarea name="text" id="text" placeholder="Introdu textul aici..."></textarea>
 
             <div class="field">
