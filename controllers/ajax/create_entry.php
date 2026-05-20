@@ -126,6 +126,8 @@ class AjaxCreateEntryController extends BaseController
                 return 'ngrams_2_4';
             case 'regions/stop':
                 return 'ngrams_1_4';
+            case 'regions/stop-ph':
+                return 'ngrams_2_4';
             default:
                 return null;
         }

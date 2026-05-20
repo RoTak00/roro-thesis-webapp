@@ -94,7 +94,7 @@ class RoRoShapWorkerExporter:
             html = self.inject_text_between_token_divs(html, raw_text)
 
         elif self.shap_injection == "placeholder":
-            html = self.inject_text_by_percent_tags(html, raw_text, log=None)
+            html = self.inject_text_by_percent_tags(html, raw_text)
 
         pred = self.model.predict(
             self.vectorizer.transform([text])
@@ -325,11 +325,121 @@ class RoRoShapWorkerExporter:
         return str(soup)
 
     @staticmethod
-    def inject_text_by_percent_tags(html: str, full_text: str, *, log=True) -> str:
+    def _norm_text_token(s: str) -> str:
+        return re.sub(r"[^\wăâîșțĂÂÎȘȚ]", "", s.lower(), flags=re.UNICODE)
+
+
+    def _placeholder_units(self, full_text: str):
+        doc = self._get_spacy_model()(full_text)
+
+        units = []
+
+        if self.text_variant == "stop-ph":
+            for t in doc:
+                if t.is_space:
+                    continue
+
+                if t.is_stop or t.is_punct:
+                    units.append({
+                        "kind": "text",
+                        "tag": None,
+                        "raw": t.text_with_ws,
+                        "norm": self._norm_text_token(t.text),
+                    })
+                else:
+                    units.append({
+                        "kind": "placeholder",
+                        "tag": t.pos_,
+                        "raw": t.text_with_ws,
+                        "norm": t.pos_.lower(),
+                    })
+
+            return units
+
+        if self.text_variant == "ner-ph":
+            i = 0
+
+            while i < len(doc):
+                t = doc[i]
+
+                if t.ent_iob_ == "B":
+                    ent_type = t.ent_type_
+
+                    j = i + 1
+                    while j < len(doc) and doc[j].ent_iob_ == "I":
+                        j += 1
+
+                    raw = doc[i:j].text_with_ws
+
+                    units.append({
+                        "kind": "placeholder",
+                        "tag": ent_type,
+                        "raw": raw,
+                        "norm": ent_type.lower(),
+                    })
+
+                    i = j
+                    continue
+
+                if not t.is_space:
+                    units.append({
+                        "kind": "text",
+                        "tag": None,
+                        "raw": t.text_with_ws,
+                        "norm": self._norm_text_token(t.text),
+                    })
+
+                i += 1
+
+            return units
+
+        raise ValueError(f"Placeholder injection not supported for {self.text_variant}")
+
+
+    @staticmethod
+    def _parse_shap_placeholder_token(token_text: str):
+        """
+        Examples:
+        'și %'       -> text: și
+        'NOUN%'      -> placeholder: NOUN
+        '%NOUN%'     -> placeholder: NOUN
+        'NOUN% %'    -> placeholder: NOUN
+        'NOUN% . %'  -> placeholder: NOUN, text: .
+        """
+
+        parts = []
+
+        token_text = token_text.strip()
+        token_text = token_text.replace("%%", "%")
+
+        rx = re.compile(r"%?([A-Z][A-Z_]+)%")
+
+        pos = 0
+
+        for m in rx.finditer(token_text):
+            before = token_text[pos:m.start()].replace("%", "").strip()
+
+            if before:
+                for piece in re.findall(r"\w+|[^\w\s]", before, flags=re.UNICODE):
+                    parts.append(("text", piece))
+
+            parts.append(("placeholder", m.group(1)))
+
+            pos = m.end()
+
+        tail = token_text[pos:].replace("%", "").strip()
+
+        if tail:
+            for piece in re.findall(r"\w+|[^\w\s]", tail, flags=re.UNICODE):
+                parts.append(("text", piece))
+
+        return parts
+
+
+    def inject_text_by_percent_tags(self, html: str, full_text: str) -> str:
         soup = BeautifulSoup(html, "html.parser")
 
         token_id_rx = re.compile(r"^_tp_.*_ind_\d+$")
-        tag_tail_rx = re.compile(r"^[A-Z]+%")
 
         containers = [
             lab.parent
@@ -340,8 +450,8 @@ class RoRoShapWorkerExporter:
         ]
 
         for cont in containers:
-            raw_words = re.findall(r"\S+", full_text)
-            raw_i = 0
+            units = self._placeholder_units(full_text)
+            unit_i = 0
 
             token_divs = [
                 d for d in cont.find_all("div")
@@ -351,30 +461,42 @@ class RoRoShapWorkerExporter:
             ]
 
             for d in token_divs:
-                text = d.get_text(strip=False)
+                token_text = d.get_text(strip=False)
+                parts = self._parse_shap_placeholder_token(token_text)
 
-                def repl_tag(match):
-                    nonlocal raw_i
+                if not parts:
+                    continue
 
-                    if raw_i >= len(raw_words):
-                        return ""
+                rebuilt = []
 
-                    word = raw_words[raw_i]
-                    raw_i += 1
+                for kind, value in parts:
+                    matched = False
 
-                    return word
+                    while unit_i < len(units):
+                        unit = units[unit_i]
 
-                new_text = tag_tail_rx.sub(repl_tag, text, count=1)
-                new_text = new_text.replace("%", "")
+                        if kind == "placeholder" and unit["kind"] == "placeholder":
+                            rebuilt.append(unit["raw"])
+                            unit_i += 1
+                            matched = True
+                            break
 
-                visible_words = re.findall(r"\S+", new_text)
+                        if kind == "text" and unit["kind"] == "text":
+                            if unit["norm"] == self._norm_text_token(value):
+                                rebuilt.append(unit["raw"])
+                                unit_i += 1
+                                matched = True
+                                break
 
-                for w in visible_words:
-                    if raw_i < len(raw_words) and w.strip() == raw_words[raw_i]:
-                        raw_i += 1
+                        # skipped original word/entity
+                        rebuilt.append(unit["raw"])
+                        unit_i += 1
+
+                    if not matched:
+                        log(f"[warn] could not align placeholder token part: {kind}={value!r}")
 
                 d.clear()
-                d.append(NavigableString(new_text))
+                d.append(NavigableString("".join(rebuilt)))
 
         return str(soup)
 
