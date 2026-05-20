@@ -13,4 +13,6 @@ COPY docker/python/requirements.txt /tmp/requirements.txt
 
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
+RUN python -m spacy download ro_core_news_lg
+
 CMD ["python", "app/worker.py"]

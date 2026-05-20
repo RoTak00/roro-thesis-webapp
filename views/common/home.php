@@ -5,6 +5,29 @@
         <h1>Detectie Ro / Md</h1>
 
         <form id="form">
+            <div class="field">
+                <label for="task">Task</label>
+
+                <select name="task" id="task">
+                    <option value="romd" selected>Ro / Md</option>
+                    <option value="regions">Regions</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="type">Type</label>
+
+                <select name="type" id="type" required>
+                    <option value="" selected>-- Choose --</option>
+                    <option value="cleaned">Normal text</option>
+                    <option value="ner">Without named entities</option>
+                    <option value="ner-ph">Replace named entities</option>
+                    <option value="stop-list">Only stop words (vectorizer)</option>
+                    <option value="stop">Only stop words (text)</option>
+                    <option value="stop-ph">Non-stop words replaced</option>
+                </select>
+            </div>
+
             <textarea name="text" id="text" placeholder="Introdu textul aici..."></textarea>
 
             <div class="field">

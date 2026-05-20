@@ -7,3 +7,4 @@ joblib
 pymysql
 beautifulsoup4
 cryptography
+spacy

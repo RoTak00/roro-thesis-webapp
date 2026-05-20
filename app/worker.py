@@ -14,7 +14,6 @@ while True:
         task = fetch_pending_task(conn)
 
         if not task:
-            log("sleeping")
             time.sleep(POLL_SECONDS)
             continue
 

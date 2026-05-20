@@ -1,5 +1,7 @@
 import pickle
 from pathlib import Path
+import re 
+import spacy
 
 import numpy as np
 import shap
@@ -14,11 +16,17 @@ class RoRoShapWorkerExporter:
         detail_level = 50,
         min_k=8,
         max_k=None,
+        text_variant="cleaned",
+        spacy_model_name="ro_core_news_lg",
     ):
         self.pickle_path = Path(pickle_path)
 
         self.tokenizer = tokenizer
         self.output_names = output_names
+
+        self.text_variant = text_variant
+        self.spacy_model_name = spacy_model_name
+        self._spacy_model = None
 
         self.detail_level = max(1, min(100, int(detail_level)))
         self.min_k = min_k
@@ -28,6 +36,8 @@ class RoRoShapWorkerExporter:
         self.model = None
         self.vectorizer = None
         self.explainer = None
+
+      
 
         self.load()
 
@@ -60,6 +70,9 @@ class RoRoShapWorkerExporter:
         return self.model.predict_proba(X)
 
     def export_one(self, text):
+
+        text = self.preprocess_text(text)
+
         shap_values = self.explainer([text])
 
         sv = shap_values[0]
@@ -127,3 +140,71 @@ class RoRoShapWorkerExporter:
             output_names=getattr(sv, "output_names", None),
             clustering=getattr(sv, "clustering", None),
         )
+    
+    def preprocess_text(self, text):
+        if self.text_variant in {"cleaned", "raw", None}:
+            return text
+
+        if self.text_variant == "ner":
+            return self._remove_ner(text, use_placeholder=False)
+
+        if self.text_variant == "ner-ph":
+            return self._remove_ner(text, use_placeholder=True)
+
+        if self.text_variant == "stop":
+            return self._keep_stopwords(text, use_placeholder=False)
+
+        if self.text_variant == "stop-ph":
+            return self._keep_stopwords(text, use_placeholder=True)
+
+        raise ValueError(f"Unknown text_variant: {self.text_variant}")
+
+
+    def _get_spacy_model(self):
+        if self._spacy_model is None:
+            self._spacy_model = spacy.load(
+                self.spacy_model_name,
+                disable=["lemmatizer", "textcat"]
+            )
+
+        return self._spacy_model
+
+
+    def _remove_ner(self, text, use_placeholder=False):
+        doc = self._get_spacy_model()(text)
+
+        result = []
+        i = 0
+
+        while i < len(doc):
+            token = doc[i]
+
+            if token.ent_iob_ == "B":
+                ent_type = token.ent_type_
+
+                j = i + 1
+                while j < len(doc) and doc[j].ent_iob_ == "I":
+                    j += 1
+
+                if use_placeholder:
+                    result.append(f"%{ent_type}% ")
+
+                i = j
+            else:
+                if token.ent_iob_ == "O":
+                    result.append(token.text_with_ws)
+
+                i += 1
+
+        return "".join(result).strip()
+
+
+    def _keep_stopwords(self, text, use_placeholder=False):
+        doc = self._get_spacy_model()(text)
+
+        return "".join(
+            t.text_with_ws
+            if t.is_stop or t.is_punct or t.is_space
+            else (f"%{t.pos_}% " if use_placeholder else "")
+            for t in doc
+        ).strip()

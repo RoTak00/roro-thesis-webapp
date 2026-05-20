@@ -60,6 +60,12 @@ $(function () {
 
     data.append("text", "");
     data.append("detail_level", $("#highlightLevel").val());
+    data.append("task", $("#task").val());
+    data.append("type", $("#type").val());
+
+    if (!$("#type").val()) {
+      return;
+    }
 
     createEntry(data);
   });

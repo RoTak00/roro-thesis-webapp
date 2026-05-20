@@ -132,6 +132,24 @@ button {
   }
 }
 
+.field {
+  display: inline-block;
+  vertical-align: top;
+  margin-right: 16px;
+  margin-bottom: 12px;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.field select,
+.field input[type="range"] {
+  width: 100%;
+}
+
 .loader {
   position: fixed;
   inset: 0;

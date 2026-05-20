@@ -24,6 +24,7 @@ def process_task(conn, task):
     exporter = RoRoShapWorkerExporter(
         pickle_path=task["model_name"],
         detail_level=shap_params.get("detail_level", 50),
+        text_variant = shap_params.get("type", "cleaned"),
     )
 
     html = exporter.export_one(text)
