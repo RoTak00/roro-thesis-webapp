@@ -16,7 +16,7 @@ class RoRoShapWorkerExporter:
     def __init__(
         self,
         pickle_path,
-        tokenizer=r"\W+",
+        tokenizer=r"%[A-Z_]+%|\w+(?::\w+)?|[^\w\s]",
         output_names=None,
         detail_level = 50,
         min_k=8,
@@ -155,7 +155,7 @@ class RoRoShapWorkerExporter:
         )
     
     def preprocess_text(self, text):
-        if self.text_variant in {"cleaned", "raw", None}:
+        if self.text_variant in {"cleaned", "raw", "stop-list", None}:
             return text
 
         if self.text_variant == "ner":
@@ -398,39 +398,30 @@ class RoRoShapWorkerExporter:
 
     @staticmethod
     def _parse_shap_placeholder_token(token_text: str):
-        """
-        Examples:
-        'și %'       -> text: și
-        'NOUN%'      -> placeholder: NOUN
-        '%NOUN%'     -> placeholder: NOUN
-        'NOUN% %'    -> placeholder: NOUN
-        'NOUN% . %'  -> placeholder: NOUN, text: .
-        """
-
         parts = []
 
-        token_text = token_text.strip()
-        token_text = token_text.replace("%%", "%")
+        token_text = token_text.strip().replace("%%", "%")
+
+        if token_text == "%":
+            return []
 
         rx = re.compile(r"%?([A-Z][A-Z_]+)%")
-
         pos = 0
 
         for m in rx.finditer(token_text):
             before = token_text[pos:m.start()].replace("%", "").strip()
 
             if before:
-                for piece in re.findall(r"\w+|[^\w\s]", before, flags=re.UNICODE):
+                for piece in re.findall(r"\w+(?::\w+)?|[^\w\s]", before, flags=re.UNICODE):
                     parts.append(("text", piece))
 
             parts.append(("placeholder", m.group(1)))
-
             pos = m.end()
 
         tail = token_text[pos:].replace("%", "").strip()
 
         if tail:
-            for piece in re.findall(r"\w+|[^\w\s]", tail, flags=re.UNICODE):
+            for piece in re.findall(r"\w+(?::\w+)?|[^\w\s]", tail, flags=re.UNICODE):
                 parts.append(("text", piece))
 
         return parts
@@ -476,10 +467,11 @@ class RoRoShapWorkerExporter:
                         unit = units[unit_i]
 
                         if kind == "placeholder" and unit["kind"] == "placeholder":
-                            rebuilt.append(unit["raw"])
-                            unit_i += 1
-                            matched = True
-                            break
+                            if unit["tag"] == value or value in {"NUMERIC_VALUE"}:
+                                rebuilt.append(unit["raw"])
+                                unit_i += 1
+                                matched = True
+                                break
 
                         if kind == "text" and unit["kind"] == "text":
                             if unit["norm"] == self._norm_text_token(value):
