@@ -45,16 +45,14 @@ class AjaxCreateEntryController extends BaseController
             return;
         }
 
-        $path = $task . '/' . $type;
+        $model_name = $_POST['model_name'] ?? '';
 
-        $model_name = $this->getModelName($path);
-
-        if (!$model_name) {
+        if (empty($model_name)) {
             http_response_code(400);
 
             echo json_encode([
                 'success' => false,
-                'error' => 'Invalid task or type'
+                'error' => 'Missing model name'
             ]);
 
             return;
@@ -115,21 +113,4 @@ class AjaxCreateEntryController extends BaseController
         ]);
     }
 
-    private function getModelName($path)
-    {
-        switch ($path) {
-            case 'romd/cleaned':
-                return 'ngrams_1_3';
-            case 'regions/cleaned':
-                return 'ngrams_1_4';
-            case 'romd/ner-ph':
-                return 'ngrams_2_4';
-            case 'regions/stop':
-                return 'ngrams_1_4';
-            case 'regions/stop-ph':
-                return 'ngrams_2_4';
-            default:
-                return null;
-        }
-    }
 }

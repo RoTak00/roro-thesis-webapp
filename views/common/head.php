@@ -7,7 +7,9 @@
     <title><?= $title ?></title>
 
     <?= $styles ?>
+    <?= $javascript_variable_names ?>
     <?= $scripts ?>
+
 
 </head>
 

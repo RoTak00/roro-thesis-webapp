@@ -7,6 +7,11 @@ $(function () {
   const $clearAllBtn = $("#clearAllBtn");
   const $highlightLevel = $("#highlightLevel");
   const $highlightLevelValue = $("#highlightLevelValue");
+  const $reinjectText = $("#reinjectText");
+
+  const $task = $("#task");
+  const $type = $("#type");
+  const $model = $("#model");
 
   function setLoading(state) {
     $loader.css("display", state ? "flex" : "none");
@@ -62,6 +67,7 @@ $(function () {
     data.append("detail_level", $("#highlightLevel").val());
     data.append("task", $("#task").val());
     data.append("type", $("#type").val());
+    data.append("model", $("#model").val());
     data.append("reinject_text", $("#reinjectText").is(":checked") ? "1" : "0");
 
     if (!$("#type").val()) {
@@ -79,9 +85,6 @@ $(function () {
     $results.empty();
   });
 
-  const $type = $("#type");
-  const $reinjectText = $("#reinjectText");
-
   function updateReinjectAvailability() {
     const value = $type.val();
 
@@ -97,6 +100,46 @@ $(function () {
   $type.on("change", updateReinjectAvailability);
 
   updateReinjectAvailability();
+
+  function updateModelOptions() {
+    const task = $task.val();
+    const type = $type.val();
+
+    const models = MODEL_OPTIONS?.[task]?.[type] || {};
+
+    $model.empty();
+
+    const keys = Object.keys(models);
+
+    if (!task || !type || keys.length === 0) {
+      $model.prop("disabled", true);
+
+      $model.append(
+        $("<option>", {
+          value: "",
+          text: "-- No model available --",
+        }),
+      );
+
+      return;
+    }
+
+    $model.prop("disabled", false);
+
+    keys.forEach(function (modelKey) {
+      $model.append(
+        $("<option>", {
+          value: modelKey,
+          text: models[modelKey],
+        }),
+      );
+    });
+  }
+
+  $task.on("change", updateModelOptions);
+  $type.on("change", updateModelOptions);
+
+  updateModelOptions();
 
   function appendHtmlAndRunScripts($container, html) {
     const $tmp = $("<div>").html(html);

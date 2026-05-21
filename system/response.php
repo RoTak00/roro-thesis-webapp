@@ -5,6 +5,7 @@ class Response
 
     public $styles = [];
     public $scripts = [];
+    private $javascript_variable_names = [];
 
     public function __construct($registry)
     {
@@ -109,6 +110,34 @@ class Response
     public function addMeta($key, $value)
     {
         $this->meta[$key] = $value;
+    }
+
+    public function localiseScripts($data)
+    {
+        $this->javascript_variable_names = array_merge($this->javascript_variable_names, $data);
+    }
+
+    public function getJavascriptVariableNames()
+    {
+        ob_start();
+
+        echo "<script>";
+
+        foreach ($this->javascript_variable_names as $key => $value) {
+            if (is_array($value) || is_object($value)) {
+                echo 'var ' . $key . ' = ' . json_encode($value) . ';';
+            } elseif (is_bool($value)) {
+                echo 'var ' . $key . ' = ' . ($value ? 'true' : 'false') . ';';
+            } elseif (is_numeric($value)) {
+                echo 'var ' . $key . ' = ' . $value . ';';
+            } else {
+                echo 'var ' . $key . ' = ' . json_encode((string) $value) . ';';
+            }
+        }
+
+        echo "</script>";
+
+        return ob_get_clean();
     }
 
 }

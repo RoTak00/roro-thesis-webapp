@@ -29,6 +29,14 @@
             </div>
 
             <div class="field">
+                <label for="model">Model</label>
+
+                <select name="model" id="model" disabled>
+                    <option value="">-- Choose task/type first --</option>
+                </select>
+            </div>
+
+            <div class="field">
                 <label>&nbsp;</label>
                 <label>
                     <input type="checkbox" name="reinject_text" id="reinjectText" value="1" disabled>

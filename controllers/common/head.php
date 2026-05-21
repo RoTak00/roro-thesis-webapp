@@ -14,7 +14,7 @@ class CommonHeadController extends BaseController
 
         $data['styles'] = $this->response->getStyles();
         $data['scripts'] = $this->response->getScripts();
-
+        $data['javascript_variable_names'] = $this->response->getJavascriptVariableNames();
 
         $data['title'] = $setting['page_title'] ?? $WEBSITE_NAME ?? '';
 
