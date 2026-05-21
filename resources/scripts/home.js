@@ -105,19 +105,27 @@ $(function () {
     const task = $task.val();
     const type = $type.val();
 
-    const models = MODEL_OPTIONS?.[task]?.[type] || {};
+    let models = MODEL_OPTIONS?.[task]?.[type] || [];
 
     $model.empty();
 
-    const keys = Object.keys(models);
+    if (!Array.isArray(models)) {
+      models = Object.keys(models).map(function (key) {
+        return {
+          key: key,
+          label: models[key].label || models[key],
+          accuracy: models[key].accuracy || null,
+        };
+      });
+    }
 
-    if (!task || !type || keys.length === 0) {
+    if (!task || !type || models.length === 0) {
       $model.prop("disabled", true);
 
       $model.append(
         $("<option>", {
           value: "",
-          text: "-- No model available --",
+          text: "No models exist",
         }),
       );
 
@@ -126,11 +134,16 @@ $(function () {
 
     $model.prop("disabled", false);
 
-    keys.forEach(function (modelKey) {
+    models.forEach(function (model) {
+      const accuracy =
+        model.accuracy !== null && model.accuracy !== undefined
+          ? ` - ${(parseFloat(model.accuracy) * 100).toFixed(2)}%`
+          : "";
+
       $model.append(
         $("<option>", {
-          value: modelKey,
-          text: models[modelKey],
+          value: model.key,
+          text: `${model.label}${accuracy}`,
         }),
       );
     });

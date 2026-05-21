@@ -29,20 +29,20 @@
             </div>
 
             <div class="field">
-                <label for="model">Model</label>
-
-                <select name="model" id="model" disabled>
-                    <option value="">-- Choose task/type first --</option>
-                </select>
-            </div>
-
-            <div class="field">
                 <label>&nbsp;</label>
                 <label>
                     <input type="checkbox" name="reinject_text" id="reinjectText" value="1" disabled>
 
                     Reinject text into result
                 </label>
+            </div>
+
+            <div class="field" style='display: block;'>
+                <label for="model">Model</label>
+
+                <select name="model" id="model" disabled>
+                    <option value="">-- Choose task/type first --</option>
+                </select>
             </div>
 
             <textarea name="text" id="text" placeholder="Introdu textul aici..."></textarea>

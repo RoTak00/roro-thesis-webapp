@@ -1,0 +1,25 @@
+task,type,key,label,accuracy
+romd,cleaned,cleaned/ngrams_1_3,N-grams 1-3,0.886888384598076
+romd,cleaned,cleaned/ngrams_2_4,N-grams 2-4,0.869897241054631
+romd,cleaned,cleaned_split/ngrams_1_3,(Split by journals) N-grams 1-3,0.8755091269174
+romd,cleaned,cleaned_split/ngrams_2_4,(Split by journals) N-grams 2-4,0.845659809801394
+romd,cleaned,shuffled_j_200/ngrams_1_3,(Shuffled journals size 200) N-grams 1-3,0.882893456795472
+romd,cleaned,shuffled_j_200/ngrams_2_4,(Shuffled journals size 200) N-grams 2-4,0.812529293374873
+romd,cleaned,shuffled_j_400/ngrams_1_3,(Shuffled journals size 400) N-grams 1-3,0.923927111845747
+romd,cleaned,shuffled_j_400/ngrams_2_4,(Shuffled journals size 400) N-grams 2-4,0.877171745509413
+romd,cleaned,shuffled_j_600/ngrams_1_3,(Shuffled journals size 600) N-grams 1-3,0.942428242195684
+romd,cleaned,shuffled_j_600/ngrams_2_4,(Shuffled journals size 600) N-grams 2-4,0.906281164885816
+romd,cleaned,unique_full/ngrams_1_3,(Unique sentences) N-grams 1-3,0.800397735565796
+romd,cleaned,unique_full/ngrams_2_4,(Unique sentences) N-grams 2-4,0.774405221126379
+romd,cleaned,unique_100/ngrams_1_3,(Unique sentences size 100) N-grams 1-3,0.800389655747618
+romd,cleaned,unique_100/ngrams_2_4,(Unique sentences size 100) N-grams 2-4,0.774153964844972
+romd,cleaned,shuffled_200/ngrams_1_3,(Shuffled size 200) N-grams 1-3,0.949618762580809
+romd,cleaned,shuffled_200/ngrams_2_4,(Shuffled size 200) N-grams 2-4,0.890627789126477
+romd,cleaned,shuffled_400/ngrams_1_3,(Shuffled size 400) N-grams 1-3,0.986511890575122
+romd,cleaned,shuffled_400/ngrams_2_4,(Shuffled size 400) N-grams 2-4,0.964031548670237
+romd,cleaned,shuffled_600/ngrams_1_3,(Shuffled size 600) N-grams 1-3,0.993339638503573
+romd,cleaned,shuffled_600/ngrams_2_4,(Shuffled size 600) N-grams 2-4,0.981040878520387
+romd,ner-ph,ngrams_2_4,N-grams 2-4,0.833385927443637
+regions,cleaned,ngrams_1_4,N-grams 1-4,0.69660075600474
+regions,stop,ngrams_1_4,N-grams 1-4,0.356100593637482
+regions,stop-ph,ngrams_2_4,N-grams 2-4,0.410489352126157

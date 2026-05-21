@@ -45,7 +45,7 @@ class AjaxCreateEntryController extends BaseController
             return;
         }
 
-        $model_name = $_POST['model_name'] ?? '';
+        $model_name = $_POST['model'] ?? '';
 
         if (empty($model_name)) {
             http_response_code(400);
