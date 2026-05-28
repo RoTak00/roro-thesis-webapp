@@ -8,6 +8,7 @@ $PASSWORD = "app";
 $DATABASE = "app";
 
 $HOST = getenv("HOST");
+$PORT = getenv("PORT");
 $IS_LOCAL = true;
 
 $PHP_DISPLAY_ERRORS = 1;
