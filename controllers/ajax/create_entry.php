@@ -5,15 +5,81 @@ class AjaxCreateEntryController extends BaseController
     {
         header('Content-Type: application/json');
 
-        if (empty($_POST['text'])) {
-            http_response_code(400);
+        $inputText = $_POST['text'] ?? null;
+        $randomSource = null;
 
-            echo json_encode([
-                'success' => false,
-                'error' => 'Missing text'
-            ]);
+        if (empty($inputText)) {
+            $task = $_POST['task'] ?? 'romd';
 
-            return;
+            if (!in_array($task, ['romd', 'regions'], true)) {
+                http_response_code(400);
+
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Invalid task'
+                ]);
+
+                return;
+            }
+
+            $datasetRoot = '/app/data/compress_full_dataset/' . $task;
+
+            if (!is_dir($datasetRoot)) {
+                http_response_code(500);
+
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Dataset folder not found',
+                    'dataset_root' => $datasetRoot
+                ]);
+
+                return;
+            }
+
+            $pattern = $task === 'regions'
+                ? $datasetRoot . '/*/*/*/*.json'
+                : $datasetRoot . '/*/*/*.json';
+
+            $files = glob($pattern);
+
+            if (empty($files)) {
+                http_response_code(500);
+
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'No dataset JSON files found',
+                    'dataset_root' => $datasetRoot
+                ]);
+
+                return;
+            }
+
+            $randomFile = $files[array_rand($files)];
+            $json = json_decode(file_get_contents($randomFile), true);
+
+            if (!is_array($json) || empty($json['text'])) {
+                http_response_code(500);
+
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Random dataset file has no text field',
+                    'file' => $randomFile
+                ]);
+
+                return;
+            }
+
+            $inputText = $json['text'];
+
+            $relativePath = str_replace($datasetRoot . '/', '', $randomFile);
+            $parts = explode('/', $relativePath);
+
+            $randomSource = [
+                'file' => $randomFile,
+                'relative_path' => $relativePath,
+                'class' => $parts[0] ?? null,
+                'journal' => $parts[count($parts) - 2] ?? null,
+            ];
         }
 
         $detail_level = $_POST['detail_level'] ?? 50;
@@ -66,7 +132,8 @@ class AjaxCreateEntryController extends BaseController
             'task' => $task,
             'type' => $type,
             'detail_level' => $detail_level,
-            'shap_injection_type' => $shap_injection_type
+            'shap_injection_type' => $shap_injection_type,
+            'random_source' => $randomSource
         ];
 
         $tasksDir = getenv('TASKS_DIR') ?: __DIR__ . '/../../storage/tasks';
@@ -79,7 +146,7 @@ class AjaxCreateEntryController extends BaseController
 
         $inputFile = $tasksDir . '/' . $taskInputId . '.txt';
 
-        $written = file_put_contents($inputFile, $_POST['text']);
+        $written = file_put_contents($inputFile, $inputText);
 
         if ($written === false) {
             http_response_code(500);
@@ -109,7 +176,8 @@ class AjaxCreateEntryController extends BaseController
         echo json_encode([
             'success' => true,
             'task_id' => $this->db->insert_id(),
-            'input_file' => $inputFile
+            'input_file' => $inputFile,
+            'random_source' => $randomSource
         ]);
     }
 

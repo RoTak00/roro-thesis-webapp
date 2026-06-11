@@ -28,7 +28,16 @@ def process_task(conn, task):
         shap_injection= shap_params.get("shap_injection_type", None),
     )
 
-    html = exporter.export_one(text)
+    random_source = shap_params.get("random_source") or {}
+
+    true_label = random_source.get("class")
+    journal = random_source.get("journal")
+
+    html = exporter.export_one(
+        text,
+        true_label=true_label,
+        journal=journal,
+    )
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 

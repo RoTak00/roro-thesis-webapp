@@ -11,7 +11,8 @@ WORKDIR /app
 
 COPY docker/python/requirements.txt /tmp/requirements.txt
 
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir --default-timeout=120 -r /tmp/requirements.txt
 
 RUN python -m spacy download ro_core_news_lg
 

@@ -12,3 +12,4 @@ cgi-bin
 resources/images/content/** 
 *.pyc
 storage
+data

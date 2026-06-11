@@ -76,7 +76,7 @@ class RoRoShapWorkerExporter:
         X = self.vectorizer.transform(texts)
         return self.model.predict_proba(X)
 
-    def export_one(self, text):
+    def export_one(self, text, true_label=None, journal=None):
         raw_text = text 
         text = self.preprocess_text(text)
 
@@ -103,6 +103,8 @@ class RoRoShapWorkerExporter:
         return (
             f"<h3>SHAP explanation</h3>"
             f"<p><b>Predicted:</b> {pred}</p>"
+            f"{f'<p><b>True label:</b> {true_label}</p>' if true_label else ''}"
+            f"{f'<p><b>Journal:</b> {journal}</p>' if journal else ''}"
             f"{html}"
         )
 
