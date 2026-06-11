@@ -1,35 +1,47 @@
 task,type,key,label,accuracy
-romd,cleaned,cleaned/ngrams_1_3,N-grams 1-3,0.886888384598076
-romd,cleaned,cleaned/ngrams_2_4,N-grams 2-4,0.869897241054631
-romd,cleaned,cleaned_split/ngrams_1_3,(Split by journals) N-grams 1-3,0.8755091269174
-romd,cleaned,cleaned_split/ngrams_2_4,(Split by journals) N-grams 2-4,0.845659809801394
-romd,cleaned,shuffled_j_200/ngrams_1_3,(Shuffled journals size 200) N-grams 1-3,0.882893456795472
-romd,cleaned,shuffled_j_200/ngrams_2_4,(Shuffled journals size 200) N-grams 2-4,0.812529293374873
-romd,cleaned,shuffled_j_400/ngrams_1_3,(Shuffled journals size 400) N-grams 1-3,0.923927111845747
-romd,cleaned,shuffled_j_400/ngrams_2_4,(Shuffled journals size 400) N-grams 2-4,0.877171745509413
-romd,cleaned,shuffled_j_600/ngrams_1_3,(Shuffled journals size 600) N-grams 1-3,0.942428242195684
-romd,cleaned,shuffled_j_600/ngrams_2_4,(Shuffled journals size 600) N-grams 2-4,0.906281164885816
-romd,cleaned,unique_full/ngrams_1_3,(Unique sentences) N-grams 1-3,0.800397735565796
-romd,cleaned,unique_full/ngrams_2_4,(Unique sentences) N-grams 2-4,0.774405221126379
-romd,cleaned,unique_100/ngrams_1_3,(Unique sentences size 100) N-grams 1-3,0.800389655747618
-romd,cleaned,unique_100/ngrams_2_4,(Unique sentences size 100) N-grams 2-4,0.774153964844972
-romd,cleaned,shuffled_200/ngrams_1_3,(Shuffled size 200) N-grams 1-3,0.949618762580809
-romd,cleaned,shuffled_200/ngrams_2_4,(Shuffled size 200) N-grams 2-4,0.890627789126477
-romd,cleaned,shuffled_400/ngrams_1_3,(Shuffled size 400) N-grams 1-3,0.986511890575122
-romd,cleaned,shuffled_400/ngrams_2_4,(Shuffled size 400) N-grams 2-4,0.964031548670237
-romd,cleaned,shuffled_600/ngrams_1_3,(Shuffled size 600) N-grams 1-3,0.993339638503573
-romd,cleaned,shuffled_600/ngrams_2_4,(Shuffled size 600) N-grams 2-4,0.981040878520387
-romd,ner,cleaned_split/ngrams_1_3,(Split by journals) N-grams 1-3,0.8355878158299548
-romd,ner-ph,cleaned_split/ngrams_1_3,(Split by journals) N-grams 1-3,0.8355878158299548
-romd,stop-list,cleaned_split/ngrams_1_3,(Split by journals) N-grams 1-3,0.7645980855582335
-romd,stop-list,cleaned_split/ngrams_2_4,(Split by journals) N-grams 2-4,0.5
-romd,stop-list,shuffled_j_200/ngrams_1_3,(Shuffled journals size 200) N-grams 1-3,0.6555905813309879
-romd,stop-list,shuffled_j_200/ngrams_2_4,(Shuffled journals size 200) N-grams 2-4,0.5
-romd,stop,cleaned_split/ngrams_1_3,(Split by journals) N-grams 1-3,0.7829235406585331
-romd,stop-ph,cleaned_split/ngrams_1_3,(Split by journals) N-grams 1-3,0.7909193244025933
-regions,cleaned,cleaned_split/ngrams_1_3,(Split by journals) N-grams 1-3,0.53496892542702
-regions,ner,cleaned_split/ngrams_1_3,(Split by journals) N-grams 1-3,0.26734273625756305
-regions,ner-ph,cleaned_split/ngrams_1_3,(Split by journals) N-grams 1-3,0.2767262083787652
-regions,stop-list,cleaned_split/ngrams_1_3,(Split by journals) N-grams 1-3,0.19451651669886383
-regions,stop,cleaned_split/ngrams_1_3,(Split by journals) N-grams 1-3,0.23281615961193108
-regions,stop-ph,cleaned_split/ngrams_1_3,(Split by journals) N-grams 1-3,0.260036561059833
+romd,cleaned,cleaned/ngrams_1_3,N-grams 1-3,
+romd,cleaned,cleaned/ngrams_2_4,N-grams 2-4,
+romd,cleaned,cleaned_split/ngrams_1_3,(Split by journals) N-grams 1-3,
+romd,cleaned,cleaned_split/ngrams_2_4,(Split by journals) N-grams 2-4,
+romd,cleaned,shuffled_j_200/ngrams_1_3,(Shuffled journals size 200) N-grams 1-3,
+romd,cleaned,shuffled_j_200/ngrams_2_4,(Shuffled journals size 200) N-grams 2-4,
+romd,cleaned,shuffled_j_400/ngrams_1_3,(Shuffled journals size 400) N-grams 1-3,
+romd,cleaned,shuffled_j_400/ngrams_2_4,(Shuffled journals size 400) N-grams 2-4,
+romd,cleaned,shuffled_j_600/ngrams_1_3,(Shuffled journals size 600) N-grams 1-3,
+romd,cleaned,shuffled_j_600/ngrams_2_4,(Shuffled journals size 600) N-grams 2-4,
+romd,cleaned,unique_full/ngrams_1_3,(Unique sentences) N-grams 1-3,
+romd,cleaned,unique_full/ngrams_2_4,(Unique sentences) N-grams 2-4,
+romd,cleaned,unique_100/ngrams_1_3,(Unique sentences size 100) N-grams 1-3,
+romd,cleaned,unique_100/ngrams_2_4,(Unique sentences size 100) N-grams 2-4,
+romd,cleaned,shuffled_200/ngrams_1_3,(Shuffled size 200) N-grams 1-3,
+romd,cleaned,shuffled_200/ngrams_2_4,(Shuffled size 200) N-grams 2-4,
+romd,cleaned,shuffled_400/ngrams_1_3,(Shuffled size 400) N-grams 1-3,
+romd,cleaned,shuffled_400/ngrams_2_4,(Shuffled size 400) N-grams 2-4,
+romd,cleaned,shuffled_600/ngrams_1_3,(Shuffled size 600) N-grams 1-3,
+romd,cleaned,shuffled_600/ngrams_2_4,(Shuffled size 600) N-grams 2-4,
+romd,ner,cleaned_split/ngrams_1_3,(Split by journals) N-grams 1-3,
+romd,ner-ph,cleaned_split/ngrams_1_3,(Split by journals) N-grams 1-3,
+romd,stop-list,cleaned_split/ngrams_1_3,(Split by journals) N-grams 1-3,
+romd,stop-list,cleaned_split/ngrams_2_4,(Split by journals) N-grams 2-4,
+romd,stop-list,shuffled_j_200/ngrams_1_3,(Shuffled journals size 200) N-grams 1-3,
+romd,stop-list,shuffled_j_200/ngrams_2_4,(Shuffled journals size 200) N-grams 2-4,
+romd,stop,cleaned_split/ngrams_1_3,(Split by journals) N-grams 1-3,
+romd,stop-ph,cleaned_split/ngrams_1_3,(Split by journals) N-grams 1-3,
+regions,cleaned,cleaned_split/ngrams_1_3,(Split by journals) N-grams 1-3,
+regions,ner,cleaned_split/ngrams_1_3,(Split by journals) N-grams 1-3,
+regions,ner-ph,cleaned_split/ngrams_1_3,(Split by journals) N-grams 1-3,
+regions,stop-list,cleaned_split/ngrams_1_3,(Split by journals) N-grams 1-3,
+regions,stop,cleaned_split/ngrams_1_3,(Split by journals) N-grams 1-3,
+regions,stop-ph,cleaned_split/ngrams_1_3,(Split by journals) N-grams 1-3,
+romd,cleaned,best/ngrams_1_3,"(Best model) Full text, 4000 features, N-grams 1-3",0.8902
+romd,cleaned,best/ngrams_2_4,"(Best model) Full text, 4000 features, N-grams 2-4",0.8644
+romd,ner-ph,best/ngrams_1_3,"(Best model) Full text, 4000 features, N-grams 1-3",0.8537
+romd,ner-ph,best/ngrams_2_4,"(Best model) Full text, 4000 features, N-grams 2-4",0.8325
+romd,stop-ph,best/ngrams_1_3,"(Best model) Full text, 2000 features, N-grams 1-3",0.7965
+romd,stop-ph,best/ngrams_2_4,"(Best model) Full text, 4000 features, N-grams 2-4",0.7928
+regions,cleaned,best/ngrams_1_3,"(Best model) Shuffled size 600, 6000 features, N-grams 1-3",0.6422
+regions,cleaned,best/ngrams_2_4,"(Best model) Shuffled size 600, 10000 features, N-grams 2-4",0.5025
+regions,ner-ph,best/ngrams_1_3,"(Best model) Full text, 10000 features, N-grams 1-3",0.4697
+regions,ner-ph,best/ngrams_2_4,"(Best model) Shuffled size 400, 10000 features, N-grams 2-4",0.3395
+regions,stop-ph,best/ngrams_1_3,"(Best model) Shuffled size 400, 10000 features, N-grams 1-3",0.3408
+regions,stop-ph,best/ngrams_2_4,"(Best model) Shuffled size 200, 10000 features, N-grams 2-4",0.3464

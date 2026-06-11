@@ -24,7 +24,7 @@
                     <option value="ner-ph">Replace named entities</option>
                     <option value="stop-list">Only stop words (vectorizer)</option>
                     <option value="stop">Only stop words (text)</option>
-                    <option value="stop-ph">Non-stop words replaced</option>
+                    <option value="stop-ph">Content words replaced</option>
                 </select>
             </div>
 

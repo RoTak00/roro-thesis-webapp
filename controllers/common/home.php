@@ -47,7 +47,7 @@ class CommonHomeController extends BaseController
             $options[$task][$type][] = [
                 'key' => $item['key'],
                 'label' => $item['label'],
-                'accuracy' => (float) $item['accuracy'],
+                'accuracy' => $item['accuracy'] ? (float) $item['accuracy'] : null,
             ];
         }
 
