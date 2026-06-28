@@ -6,7 +6,6 @@ cgi-bin
 **.css.map
 .sass-cache
 .sass-cache/*
-**/*.css
 **/*.log
 **/cache/
 resources/images/content/** 
